@@ -71,9 +71,10 @@ impl Chapter {
         )?)
     }
 
-    pub async fn cur_path_name(manga: &str) -> Result<String, Box<dyn std::error::Error>> {
-        // TODO Fix Chapter 1 ( to actually get a valid chapter )
-        let page = reqwest::get(format!("{URL}read-online/{manga}-chapter-1.html"))
+    pub async fn cur_path_name(&self, manga: &str) -> Result<String, Box<dyn std::error::Error>> {
+        let chapter = self.clone();
+        println!("Chapter: {}", chapter);
+        let page = reqwest::get(format!("{URL}read-online/{manga}-chapter-{chapter}.html"))
             .await?
             .text()
             .await?;

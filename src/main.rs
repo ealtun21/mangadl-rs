@@ -35,7 +35,10 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
             "How would you like to save?",
             vec![SaveType::Urls, SaveType::Images],
         )
-        .prompt() { break save_type } else {
+        .prompt()
+        {
+            break save_type;
+        } else {
             eprintln!("{}", "Please select an option.".red().bold());
             continue;
         };
@@ -48,7 +51,10 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
                 "How would you like to download?",
                 vec![DownloadType::Single, DownloadType::Multi],
             )
-            .prompt() { break download_type } else {
+            .prompt()
+            {
+                break download_type;
+            } else {
                 eprintln!("{}", "Please select an option.".red().bold());
                 continue;
             }
@@ -62,7 +68,10 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
             if let Ok(treads) = CustomType::new("Number of Threads: ")
                 .with_error_message("Please type a valid number")
                 .with_help_message("Type the amount of threads you want to use")
-                .prompt() { break treads } else {
+                .prompt()
+            {
+                break treads;
+            } else {
                 eprintln!("{}", "Please enter amount of treads".red().bold());
                 continue;
             }
@@ -76,7 +85,8 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
             &format!("Select Genre(s) {}", "Skip with ESC".yellow()),
             Manga::find_all_genre(&manga).await,
         )
-        .prompt_skippable() {
+        .prompt_skippable()
+        {
             if genres.is_some() && genres.clone().unwrap().is_empty() {
                 eprintln!(
                     "{}",
@@ -102,18 +112,25 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
             return Ok(());
         }
         loop {
-            if let Ok(ans) = Select::new("Select Manga", selection_manga.as_ref().unwrap().clone())
-                .prompt() { break ans } else {
+            if let Ok(ans) =
+                Select::new("Select Manga", selection_manga.as_ref().unwrap().clone()).prompt()
+            {
+                break ans;
+            } else {
                 eprintln!("{}", "Please select a manga.".red().bold());
                 continue;
             }
         }
-    } else { loop {
-        if let Ok(ans) = Select::new("Select Manga", manga.clone()).prompt() { break ans } else {
-            eprintln!("{}", "Please select a manga.".red().bold());
-            continue;
+    } else {
+        loop {
+            if let Ok(ans) = Select::new("Select Manga", manga.clone()).prompt() {
+                break ans;
+            } else {
+                eprintln!("{}", "Please select a manga.".red().bold());
+                continue;
+            }
         }
-    } };
+    };
 
     let chapters = loop {
         if let Ok(chapters) = MultiSelect::new(
@@ -122,7 +139,8 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
                 .await
                 .expect("Network Error, try again later."),
         )
-        .prompt() {
+        .prompt()
+        {
             if chapters.is_empty() {
                 eprintln!("{}", "Please select at least one chapter.".red().bold());
                 continue;

@@ -35,9 +35,9 @@ impl Manga {
     pub async fn urls_all(&self) -> Vec<String> {
         let mut urls: Vec<String> = Vec::new();
         let chapters = Chapter::list(self.i.as_str()).await.unwrap();
-        let url = Chapter::cur_path_name(self.i.as_str()).await.unwrap();
 
         for chapter in chapters {
+            let url = chapter.cur_path_name(self.i.as_str()).await.unwrap();
             for page in 1..chapter.Page.parse::<usize>().unwrap() {
                 urls.push(format!(
                     "https://{}/manga/{}/{:0>4}-{:0>3}.png",
@@ -53,9 +53,9 @@ impl Manga {
 
     pub async fn chapters_urls(&self, chapters: Vec<Chapter>) -> Vec<String> {
         let mut urls = Vec::new();
-        let url = Chapter::cur_path_name(self.i.as_str()).await.unwrap();
 
         for chapter in chapters {
+            let url = chapter.cur_path_name(self.i.as_str()).await.unwrap();
             for page in 1..chapter.Page.parse::<usize>().unwrap() {
                 urls.push(format!(
                     "https://{}/manga/{}{}/{:0>4}-{:0>3}.png",
