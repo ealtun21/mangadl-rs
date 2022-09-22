@@ -36,22 +36,37 @@ impl Manga {
         let mut urls: Vec<String> = Vec::new();
         let chapters = Chapter::list(self.i.as_str()).await.unwrap();
 
-        for chapter in chapters {
-            let url = chapter.cur_path_name(self.i.as_str()).await.unwrap();
-            for page in 1..chapter.Page.parse::<usize>().unwrap() {
-                urls.push(format!(
-                    "https://{}/manga/{}/{:0>4}-{:0>3}.png",
-                    url,
-                    self.i,
-                    chapter.to_url_id(),
-                    page
-                ));
-            }
-        }
+        let mut one_chapters_urls = self.chapters_urls_multi(chapters).await;
+        urls.append(&mut one_chapters_urls);
         urls
     }
 
-    pub async fn chapters_urls(&self, chapters: Vec<Chapter>) -> Vec<String> {
+    pub async fn chapters_urls_multi(&self, chapters: Vec<Chapter>) -> Vec<String> {
+        let mut urls = Vec::new();
+
+        // Split chapters into chunks of 3
+        let chunks = chapters.chunks(3);
+
+        // Spawn a tread for each chunk
+        let mut handles = Vec::new();
+        for chunk in chunks {
+            let myself = self.clone();
+            let chunk = chunk.to_vec();
+            let handle =
+                tokio::spawn(async move { Self::chapters_urls_single(&myself, chunk).await });
+            handles.push(handle);
+        }
+
+        // Join all the handles
+        for handle in handles {
+            let mut one_chapters_urls = handle.await.unwrap();
+            urls.append(&mut one_chapters_urls);
+        }
+
+        urls
+    }
+
+    pub async fn chapters_urls_single(&self, chapters: Vec<Chapter>) -> Vec<String> {
         let mut urls = Vec::new();
 
         for chapter in chapters {
@@ -102,7 +117,8 @@ impl Manga {
         Ok(covers)
     }
 
-    #[must_use] pub fn filter_manga(genres: Vec<String>, manga: Vec<Manga>) -> Option<Vec<Manga>> {
+    #[must_use]
+    pub fn filter_manga(genres: Vec<String>, manga: Vec<Manga>) -> Option<Vec<Manga>> {
         let mut filtered_manga = manga;
         for genre in genres {
             filtered_manga.retain(|manga| manga.g.contains(&genre));
@@ -125,6 +141,10 @@ impl Manga {
 
 impl Display for Manga {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        if self.al.is_empty() { write!(f, "{}", self.s) } else { write!(f, "{} ({})", self.s, self.al.join(", ")) }
+        if self.al.is_empty() {
+            write!(f, "{}", self.s)
+        } else {
+            write!(f, "{} ({})", self.s, self.al.join(", "))
+        }
     }
 }

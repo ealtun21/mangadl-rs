@@ -22,9 +22,9 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         loop {
             match Manga::all_manga_list().await {
                 Ok(manga) => break manga,
-                Err(_e) => {
-                    //eprintln!("Error: {}", e);
-                    std::thread::sleep(Duration::from_millis(500));
+                Err(e) => {
+                    eprintln!("Error: {}, Retrying!", e);
+                    std::thread::sleep(Duration::from_millis(100));
                 }
             }
         }
@@ -170,7 +170,6 @@ fn get_render_config() -> RenderConfig {
     render_config.error_message = render_config
         .error_message
         .with_prefix(Styled::new("❌").with_fg(Color::LightRed));
-
     render_config.help_message = StyleSheet::new().with_fg(Color::DarkMagenta);
 
     render_config

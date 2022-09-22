@@ -25,10 +25,12 @@ pub async fn download_manga(
     download_type: DownloadType,
     threads: u8,
 ) {
-    let urls = manga.chapters_urls(chapters).await;
+    let urls = manga.chapters_urls_multi(chapters).await;
     match (save_type, download_type) {
         (SaveType::Urls, _) => urls_download(urls, &manga).await,
-        (SaveType::Images, DownloadType::Single) => images_download_single_unicode(urls, &manga).await, //images_download_single(urls, &manga).await
+        (SaveType::Images, DownloadType::Single) => {
+            images_download_single_unicode(urls, &manga).await
+        } //images_download_single(urls, &manga).await
         (SaveType::Images, DownloadType::Multi) => {
             images_download_multi_unicode(urls, &manga, threads.into()).await;
             //images_download_multi(urls, &manga, threads.into()).await // For windows
@@ -57,11 +59,10 @@ pub async fn images_download_multi(urls: Vec<String>, manga: &Manga, threads: us
     // Set progress bar
     let m = MultiProgress::new();
     let sty = ProgressStyle::with_template(
-        "[{elapsed_precise}] {bar:40.cyan/blue} {pos:>7}/{len:7} {msg}", 
+        "[{elapsed_precise}] {bar:40.cyan/blue} {pos:>7}/{len:7} {msg}",
     )
-    .unwrap()
+    .expect("Failed to create progress style")
     .progress_chars("#>-");
-
 
     // Split urls into 16 parts.
     let mut urls_split = Vec::new();
@@ -114,9 +115,9 @@ pub async fn images_download_multi(urls: Vec<String>, manga: &Manga, threads: us
                 let img = loop {
                     match get_img(url.as_str()).await {
                         Ok(img) => break img,
-                        Err(_e) => {
-                            //println!("{e}\nFailed to download image, Retrying...");
-                            std::thread::sleep(std::time::Duration::from_millis(500));
+                        Err(e) => {
+                            eprintln!("{e}\nFailed to download image, Retrying...");
+                            std::thread::sleep(std::time::Duration::from_millis(100));
                             continue;
                         }
                     }
@@ -200,8 +201,8 @@ pub async fn images_download_multi_unicode(urls: Vec<String>, manga: &Manga, thr
                 let img = loop {
                     match get_img(url.as_str()).await {
                         Ok(img) => break img,
-                        Err(_e) => {
-                            //println!("{e}\nFailed to download image, Retrying...");
+                        Err(e) => {
+                            eprintln!("{e}\nFailed to download image, Retrying...");
                             std::thread::sleep(std::time::Duration::from_millis(500));
                             continue;
                         }
