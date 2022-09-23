@@ -28,7 +28,7 @@ pub async fn download_manga(
 ) {
     let urls = manga.chapters_urls_multi(chapters).await;
     match (save_type, download_type) {
-        (SaveType::Urls, _) => urls_download(urls, &manga).await,
+        (SaveType::Urls, _) => urls_download(urls, &manga),
         (SaveType::Images, DownloadType::Single) => {
             images_download(unicode, urls, &manga, 1).await;
         }
@@ -39,7 +39,7 @@ pub async fn download_manga(
 }
 
 // Download urls seperated by a a line into a 1 text file named the manga.
-pub async fn urls_download(urls: Vec<String>, manga: &Manga) {
+pub fn urls_download(urls: Vec<String>, manga: &Manga) {
     let mut file = File::create(format!("{}.txt", manga.i)).expect("Failed to create file");
     for url in urls {
         file.write_all(format!("{}\n", url).as_bytes())
@@ -51,18 +51,19 @@ pub async fn images_download(unicode: bool, urls: Vec<String>, manga: &Manga, th
     // Set progress bar
     let m = MultiProgress::new();
 
-    let sty = match unicode {
-        true => ProgressStyle::with_template(
+    let sty = if unicode {
+        ProgressStyle::with_template(
             "{spinner:.green} [{elapsed_precise}] {bar:40.cyan/blue} {pos:>7}/{len:7} {msg}",
         )
-        .unwrap(),
-        false => ProgressStyle::with_template(
+        .unwrap()
+    } else {
+        ProgressStyle::with_template(
             "[{elapsed_precise}] {bar:40.cyan/blue} {pos:>7}/{len:7} {msg}",
         )
         .expect("Failed to create progress style")
-        .progress_chars("#>-"),
+        .progress_chars("#>-")
     };
-    
+
     // Split urls into 16 parts.
     let mut urls_split = Vec::new();
     for _ in 0..threads {

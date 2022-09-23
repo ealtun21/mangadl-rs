@@ -1,6 +1,6 @@
 use std::time::Duration;
+use termion::color;
 
-use colored::Colorize;
 use inquire::{
     ui::{Color, RenderConfig, StyleSheet, Styled},
     CustomType, MultiSelect, Select,
@@ -18,6 +18,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     // Use theme only for linux builds. Comment out for windows builds.
     inquire::set_global_render_config(get_render_config());
 
+
     let future_manga = tokio::spawn(async move {
         loop {
             match Manga::all_manga_list().await {
@@ -29,6 +30,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
             }
         }
     });
+    
 
     let save_type = loop {
         if let Ok(save_type) = Select::new(
@@ -38,10 +40,8 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         .prompt()
         {
             break save_type;
-        } else {
-            eprintln!("{}", "Please select an option.".red().bold());
-            continue;
-        };
+        }
+        eprintln!("{}Please select an option.{}", color::Fg(color::Red), color::Fg(color::Reset));
     };
 
     let download_type = match save_type {
@@ -54,10 +54,8 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
             .prompt()
             {
                 break download_type;
-            } else {
-                eprintln!("{}", "Please select an option.".red().bold());
-                continue;
             }
+            eprintln!("{}Please select an option.{}", color::Fg(color::Red), color::Fg(color::Reset));
         },
     };
 
@@ -71,10 +69,8 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
                 .prompt()
             {
                 break treads;
-            } else {
-                eprintln!("{}", "Please enter amount of treads".red().bold());
-                continue;
             }
+            eprintln!("{}Please enter amount of treads.{}", color::Fg(color::Red), color::Fg(color::Reset));
         };
     }
 
@@ -82,33 +78,30 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     let genres = loop {
         if let Ok(genres) = MultiSelect::new(
-            &format!("Select Genre(s) {}", "Skip with ESC".yellow()),
+            &format!("Select Genre(s) {}Skip with ESC{}", color::Fg(color::Yellow), color::Fg(color::Reset)),
             Manga::find_all_genre(&manga).await,
         )
         .prompt_skippable()
         {
             if genres.is_some() && genres.clone().unwrap().is_empty() {
                 eprintln!(
-                    "{}",
-                    "Please skip with the ESC button or Select Genre(s)"
-                        .red()
-                        .bold()
+                    "{}Please skip with the ESC button or Select Genre(s){}",
+                    color::Fg(color::Red),
+                    color::Fg(color::Reset),
                 );
                 continue;
-            } else {
-                break genres;
             }
-        } else {
-            eprintln!("{}", "Unreachable error!".red().bold());
-            continue;
+            break genres;
         }
+        eprintln!("{}Unreachable error!{}", color::Fg(color::Red), color::Fg(color::Reset));
     };
 
     let ans = if let Some(..) = genres {
         let selection_manga = Manga::filter_manga(genres.unwrap(), manga);
         if selection_manga.is_none() || selection_manga.clone().unwrap().is_empty() {
-            println!("No manga found for the selected genres.");
+            println!("{}No manga found for the selected genres.{}", color::Fg(color::Blue), color::Fg(color::Reset));
             sleep(Duration::from_secs(2)).await;
+            // Restart?
             return Ok(());
         }
         loop {
@@ -116,19 +109,15 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
                 Select::new("Select Manga", selection_manga.as_ref().unwrap().clone()).prompt()
             {
                 break ans;
-            } else {
-                eprintln!("{}", "Please select a manga.".red().bold());
-                continue;
             }
+            eprintln!("{}Please select a manga.{}", color::Fg(color::Red), color::Fg(color::Reset));
         }
     } else {
         loop {
             if let Ok(ans) = Select::new("Select Manga", manga.clone()).prompt() {
                 break ans;
-            } else {
-                eprintln!("{}", "Please select a manga.".red().bold());
-                continue;
             }
+            eprintln!("{}Please select a manga.{}", color::Fg(color::Red), color::Fg(color::Reset));
         }
     };
 
@@ -142,19 +131,17 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         .prompt()
         {
             if chapters.is_empty() {
-                eprintln!("{}", "Please select at least one chapter.".red().bold());
+                eprintln!("{}Please select at least one chapter.{}", color::Fg(color::Red), color::Fg(color::Reset));
                 continue;
-            } else {
-                break chapters;
             }
-        } else {
-            eprintln!("{}", "Please select a chapter.".red().bold());
-            continue;
-        };
+            break chapters;
+        }
+        eprintln!("{}Please select a chapter.{}", color::Fg(color::Red), color::Fg(color::Reset));
     };
 
     fetch::download_manga(ans, chapters, save_type, download_type, treads, true).await;
     //fetch::download_manga(ans, chapters, save_type, download_type, treads, false).await; // For windows builds
+    
     Ok(())
 }
 

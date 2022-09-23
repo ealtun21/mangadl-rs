@@ -1,14 +1,14 @@
-use image::DynamicImage;
+// Warn padantic clippy
+#![warn(clippy::pedantic)]
+
 use regex::Regex;
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
 use std::fmt::{Display, Formatter};
-use tokio::task::JoinError;
 
-use crate::{chapter::Chapter, fetch::get_img};
+use crate::{chapter::Chapter};
 
 const URL: &str = "https://mangasee123.com/";
-const COVER_URL: &str = "https://temp.compsci88.com/";
 
 // Names taken directly from mangasee123, rename was deemed unnecessary.
 #[derive(Serialize, Deserialize, Debug, Clone)]
@@ -32,15 +32,6 @@ pub struct Manga {
 }
 
 impl Manga {
-    pub async fn urls_all(&self) -> Vec<String> {
-        let mut urls: Vec<String> = Vec::new();
-        let chapters = Chapter::list(self.i.as_str()).await.unwrap();
-
-        let mut one_chapters_urls = self.chapters_urls_multi(chapters).await;
-        urls.append(&mut one_chapters_urls);
-        urls
-    }
-
     pub async fn chapters_urls_multi(&self, chapters: Vec<Chapter>) -> Vec<String> {
         let mut urls = Vec::new();
 
@@ -101,26 +92,6 @@ impl Manga {
         )?)
     }
 
-    pub async fn cover(&self) -> Result<DynamicImage, reqwest::Error> {
-        get_img(format!("{COVER_URL}cover/{}.jpg", self.i).as_str()).await
-    }
-
-    pub async fn covers_all(
-        manga_list: Vec<Manga>,
-    ) -> Result<Vec<Result<DynamicImage, reqwest::Error>>, JoinError> {
-        let mut covers = Vec::new();
-        let mut handles = Vec::new();
-        for manga in manga_list {
-            let handle = tokio::spawn(async move { manga.cover().await });
-            handles.push(handle);
-        }
-        for handle in handles {
-            covers.push(handle.await?);
-        }
-        Ok(covers)
-    }
-
-    #[must_use]
     pub fn filter_manga(genres: Vec<String>, manga: Vec<Manga>) -> Option<Vec<Manga>> {
         let mut filtered_manga = manga;
         for genre in genres {

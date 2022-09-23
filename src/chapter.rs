@@ -35,7 +35,11 @@ impl ChapterInfo {
     pub async fn to_url_id(&self) -> String {
         let chapter = self.Chapter[1..self.Chapter.len() - 1].to_string();
         let odd = self.Chapter[self.Chapter.len() - 1..].to_string();
-        if odd == "0" { chapter } else { format!("{}.{}", chapter, odd) }
+        if odd == "0" {
+            chapter
+        } else {
+            format!("{}.{}", chapter, odd)
+        }
     }
 
     pub async fn url_id_list(chapters: Vec<ChapterInfo>) -> Vec<String> {
@@ -89,14 +93,22 @@ impl Chapter {
             .replace('\"', ""))
     }
 
-    #[must_use] pub fn to_url_id(&self) -> String {
+    pub fn to_url_id(&self) -> String {
         let chapter = self.Chapter[1..self.Chapter.len() - 1].to_string();
         let odd = self.Chapter[self.Chapter.len() - 1..].to_string();
-        if odd == "0" { chapter } else { format!("{}.{}", chapter, odd) }
+        if odd == "0" {
+            chapter
+        } else {
+            format!("{}.{}", chapter, odd)
+        }
     }
 
-    #[must_use] pub fn directory(&self) -> String {
-        if self.Directory.is_empty() { "".to_string() } else { format!("/{}", self.Directory) }
+    pub fn directory(&self) -> String {
+        if self.Directory.is_empty() {
+            "".to_string()
+        } else {
+            format!("/{}", self.Directory)
+        }
     }
 }
 
