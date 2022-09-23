@@ -1,6 +1,3 @@
-// Warn padantic clippy
-#![warn(clippy::pedantic)]
-
 use regex::Regex;
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
