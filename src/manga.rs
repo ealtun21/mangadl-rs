@@ -44,8 +44,12 @@ impl Manga {
     pub async fn chapters_urls_multi(&self, chapters: Vec<Chapter>) -> Vec<String> {
         let mut urls = Vec::new();
 
-        // Split chapters into chunks of 3
-        let chunks = chapters.chunks(3);
+        // Split chapters into 16 chunks
+        let chunks = chapters.chunks(if chapters.len() / 16 == 0 {
+            1
+        } else {
+            chapters.len() / 16
+        });
 
         // Spawn a tread for each chunk
         let mut handles = Vec::new();
@@ -62,7 +66,6 @@ impl Manga {
             let mut one_chapters_urls = handle.await.unwrap();
             urls.append(&mut one_chapters_urls);
         }
-
         urls
     }
 
