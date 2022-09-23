@@ -17,7 +17,7 @@ relative-path = "1.7.2"
 inquire = "0.3.0"
 manic = "0.8.1"
 indicatif = { version = "0.17.0", features = ["tokio"] }
-termion = "1.5.6"
+crossterm = "0.25.0"
 
 [profile.release]
 strip = true

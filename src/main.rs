@@ -1,5 +1,5 @@
 use std::time::Duration;
-use termion::color;
+use crossterm::style::Stylize;
 
 use inquire::{
     ui::{Color, RenderConfig, StyleSheet, Styled},
@@ -41,7 +41,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         {
             break save_type;
         }
-        eprintln!("{}Please select an option.{}", color::Fg(color::Red), color::Fg(color::Reset));
+        eprintln!("{}", "Please select an option.".red().slow_blink());
     };
 
     let download_type = match save_type {
@@ -55,7 +55,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
             {
                 break download_type;
             }
-            eprintln!("{}Please select an option.{}", color::Fg(color::Red), color::Fg(color::Reset));
+            eprintln!("{}", "Please select an option.".red().slow_blink());
         },
     };
 
@@ -70,7 +70,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
             {
                 break treads;
             }
-            eprintln!("{}Please enter amount of treads.{}", color::Fg(color::Red), color::Fg(color::Reset));
+            eprintln!("{}", "Please enter amount of threads".red().slow_blink());
         };
     }
 
@@ -78,29 +78,27 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     let genres = loop {
         if let Ok(genres) = MultiSelect::new(
-            &format!("Select Genre(s) {}Skip with ESC{}", color::Fg(color::Yellow), color::Fg(color::Reset)),
+            &format!("Select Genre(s) {}","Skip with ESC".yellow().italic()),
             Manga::find_all_genre(&manga).await,
         )
         .prompt_skippable()
         {
             if genres.is_some() && genres.clone().unwrap().is_empty() {
                 eprintln!(
-                    "{}Please skip with the ESC button or Select Genre(s){}",
-                    color::Fg(color::Red),
-                    color::Fg(color::Reset),
+                    "{}",
+                    "Please skip with the ESC button or Select Genre(s)".red().slow_blink()
                 );
                 continue;
             }
             break genres;
         }
-        eprintln!("{}Unreachable error!{}", color::Fg(color::Red), color::Fg(color::Reset));
     };
 
     let ans = if let Some(..) = genres {
         let selection_manga = Manga::filter_manga(genres.unwrap(), manga);
         if selection_manga.is_none() || selection_manga.clone().unwrap().is_empty() {
-            println!("{}No manga found for the selected genres.{}", color::Fg(color::Blue), color::Fg(color::Reset));
-            sleep(Duration::from_secs(2)).await;
+            println!("{}", "No manga with such genres found, closing program".blue().rapid_blink());
+            sleep(Duration::from_secs(3)).await;
             // Restart?
             return Ok(());
         }
@@ -110,14 +108,14 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
             {
                 break ans;
             }
-            eprintln!("{}Please select a manga.{}", color::Fg(color::Red), color::Fg(color::Reset));
+            eprintln!("{}", "Please select manga".red().slow_blink());
         }
     } else {
         loop {
             if let Ok(ans) = Select::new("Select Manga", manga.clone()).prompt() {
                 break ans;
             }
-            eprintln!("{}Please select a manga.{}", color::Fg(color::Red), color::Fg(color::Reset));
+            eprintln!("{}", "Please select manga".red().slow_blink());
         }
     };
 
@@ -131,12 +129,12 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         .prompt()
         {
             if chapters.is_empty() {
-                eprintln!("{}Please select at least one chapter.{}", color::Fg(color::Red), color::Fg(color::Reset));
+                eprintln!("{}", "Please select at least one chapter".red().slow_blink());
                 continue;
             }
             break chapters;
         }
-        eprintln!("{}Please select a chapter.{}", color::Fg(color::Red), color::Fg(color::Reset));
+        eprintln!("{}", "Please select a chapter".red().slow_blink());
     };
 
     fetch::download_manga(ans, chapters, save_type, download_type, treads, true).await;
