@@ -153,8 +153,8 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         };
     };
 
-    fetch::download_manga(ans, chapters, save_type, download_type, treads).await;
-
+    fetch::download_manga(ans, chapters, save_type, download_type, treads, true).await;
+    //fetch::download_manga(ans, chapters, save_type, download_type, treads, false).await; // For windows builds
     Ok(())
 }
 
