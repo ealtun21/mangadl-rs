@@ -32,10 +32,10 @@ pub async fn download_manga(
     match (save_type, download_type) {
         (SaveType::Urls, _) => urls_download(urls, &manga),
         (SaveType::Images, DownloadType::Single) => {
-            images_download(unicode, urls, &manga, 1).await;
+            images_download(false, unicode, urls, &manga, 1).await;
         }
         (SaveType::Images, DownloadType::Multi) => {
-            images_download(unicode, urls, &manga, threads.into()).await;
+            images_download(false, unicode, urls, &manga, threads.into()).await;
         }
         (SaveType::PdfSingle, DownloadType::Single) => {
             save_to_pdf(download_to_ram(unicode, urls, 1).await, &manga).await
@@ -45,6 +45,8 @@ pub async fn download_manga(
         }
         (SaveType::PdfSplit, DownloadType::Single) => save_to_pdf_split_chapters(download_to_ram(unicode, urls, 1).await, &manga).await,
         (SaveType::PdfSplit, DownloadType::Multi) => save_to_pdf_split_chapters(download_to_ram(unicode, urls, threads.into()).await, &manga).await,
+        (SaveType::ImagesChapter, DownloadType::Single) => images_download(true, unicode, urls, &manga, 1).await,
+        (SaveType::ImagesChapter, DownloadType::Multi) => images_download(true, unicode, urls, &manga, threads.into()).await,
     }
 }
 
@@ -58,7 +60,7 @@ pub fn urls_download(urls: Vec<String>, manga: &Manga) {
     }
 }
 
-pub async fn images_download(unicode: bool, urls: Vec<String>, manga: &Manga, threads: usize) {
+pub async fn images_download(folder: bool, unicode: bool, urls: Vec<String>, manga: &Manga, threads: usize) {
     println!("Downlading images...");
     // Set progress bar
     let m = MultiProgress::new();
@@ -134,11 +136,22 @@ pub async fn images_download(unicode: bool, urls: Vec<String>, manga: &Manga, th
                         }
                     }
                 };
-                let path = format!(
-                    "{name}/{page}",
-                    name = &manga.i,
-                    page = &url.split('/').last().unwrap(),
-                );
+                
+                let path = if folder {
+                    format!(
+                        "{name}/{chapter}/{page}",
+                        name = &manga.i,
+                        chapter = &url.split('/').last().unwrap().split('-').next().unwrap(),
+                        page = &url.split('/').last().unwrap().split('-').last().unwrap(),
+                    )
+                } else {
+                    format!(
+                        "{name}/{page}",
+                        name = &manga.i,
+                        page = &url.split('/').last().unwrap(),
+                    )
+                };
+
                 let file_path = Path::new(&path);
                 fs::create_dir_all(file_path.parent().unwrap())
                     .await

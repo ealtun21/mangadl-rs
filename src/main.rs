@@ -34,7 +34,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let save_type = loop {
         if let Ok(save_type) = Select::new(
             "How would you like to save?",
-            vec![SaveType::PdfSplit, SaveType::PdfSingle, SaveType::Images, SaveType::Urls],
+            vec![SaveType::PdfSplit, SaveType::PdfSingle, SaveType::Images, SaveType::ImagesChapter, SaveType::Urls],
         )
         .prompt()
         {
@@ -45,6 +45,17 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     let download_type = match save_type {
         SaveType::Urls => DownloadType::Single,
+        SaveType::ImagesChapter => loop {
+            if let Ok(download_type) = Select::new(
+                "How would you like to download?",
+                vec![DownloadType::Single, DownloadType::Multi],
+            )
+            .prompt()
+            {
+                break download_type;
+            }
+            eprintln!("{}", "Please select an option.".red().slow_blink());
+        },
         SaveType::PdfSplit => loop {
             if let Ok(download_type) = Select::new(
                 "How would you like to download?",
@@ -99,9 +110,10 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     let genres = loop {
         if let Ok(genres) = MultiSelect::new(
-            &format!("Select Genre(s) {}", "Skip with ESC".yellow().italic()),
+            &format!("Select Genre(s)"),
             Manga::find_all_genre(&manga).await,
         )
+        .with_help_message("esc to skip, ↑↓ to move, space to select one, → to all, ← to none, type to filter")
         .prompt_skippable()
         {
             if genres.is_some() && genres.clone().unwrap().is_empty() {
