@@ -7,9 +7,9 @@ Simple manga downloader in rust
 
 Download the binary from the [release page](https://github.com/ealtun21/mangadl-rs/releases)
 
-For linux users, chmod +x NAME_OF_THE_BINARY and run it with ./NAME_OF_THE_BINARY
-for windows users, run it with NAME_OF_THE_BINARY.exe
-for mac users, chmod +x NAME_OF_THE_BINARY and run it with ./NAME_OF_THE_BINARY
+* For linux users, chmod +x NAME_OF_THE_BINARY and run it with ./NAME_OF_THE_BINARY
+* for windows users, run it with NAME_OF_THE_BINARY.exe
+* for mac users, chmod +x NAME_OF_THE_BINARY and run it with ./NAME_OF_THE_BINARY
  
 Note for linux and mac users you should move the binary to /usr/bin or /usr/local/bin after you chmod +x it
 
