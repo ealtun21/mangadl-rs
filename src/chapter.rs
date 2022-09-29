@@ -3,7 +3,11 @@
 use regex::Regex;
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
-use std::fmt::{Display, Formatter};
+use std::{
+    fmt::{Display, Formatter},
+    time::Duration,
+};
+use tokio::time::sleep;
 
 const URL: &str = "https://mangasee123.com/";
 
@@ -75,14 +79,33 @@ impl Chapter {
         )?)
     }
 
-    pub async fn cur_path_name(&self, manga: &str) -> Result<String, Box<dyn std::error::Error>> {
+    pub async fn cur_path_name(&self, manga: &str) -> String {
         let chapter = self.clone();
-        let page = reqwest::get(format!("{URL}read-online/{manga}-chapter-{chapter}.html"))
-            .await?
+        let page = loop {
+            match loop {
+                match reqwest::get(format!("{URL}read-online/{manga}-chapter-{chapter}.html")).await
+                {
+                    Ok(data) => break data,
+                    Err(e) => {
+                        eprintln!("Error: {e}, Retrying!");
+                        sleep(Duration::from_millis(50)).await;
+                        continue;
+                    }
+                }
+            }
             .text()
-            .await?;
+            .await
+            {
+                Ok(data) => break data,
+                Err(e) => {
+                    eprintln!("Error: {e}, Retrying!");
+                    sleep(Duration::from_millis(50)).await;
+                    continue;
+                }
+            }
+        };
 
-        Ok(Regex::new(r#"vm\.CurPathName = (.*);"#)
+        Regex::new(r#"vm\.CurPathName = (.*);"#)
             .expect("Failed to create regex")
             .captures(&page)
             .expect("Failed to find chapter list")
@@ -90,9 +113,10 @@ impl Chapter {
             .expect("Failed to get chapter list")
             .as_str()
             .trim()
-            .replace('\"', ""))
+            .replace('\"', "")
     }
 
+    #[must_use]
     pub fn to_url_id(&self) -> String {
         let chapter = self.Chapter[1..self.Chapter.len() - 1].to_string();
         let odd = self.Chapter[self.Chapter.len() - 1..].to_string();
@@ -103,6 +127,7 @@ impl Chapter {
         }
     }
 
+    #[must_use]
     pub fn directory(&self) -> String {
         if self.Directory.is_empty() {
             "".to_string()

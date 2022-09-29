@@ -3,7 +3,7 @@ use serde::{Deserialize, Serialize};
 use serde_json::Value;
 use std::fmt::{Display, Formatter};
 
-use crate::{chapter::Chapter};
+use crate::chapter::Chapter;
 
 const URL: &str = "https://mangasee123.com/";
 
@@ -29,7 +29,7 @@ pub struct Manga {
 }
 
 impl Manga {
-    pub async fn chapters_urls_multi(&self, chapters: Vec<Chapter>) -> Vec<String> {
+    pub async fn chapters_urls(&self, chapters: Vec<Chapter>) -> Vec<String> {
         let mut urls = Vec::new();
 
         // Split chapters into 16 chunks
@@ -44,8 +44,26 @@ impl Manga {
         for chunk in chunks {
             let myself = self.clone();
             let chunk = chunk.to_vec();
-            let handle =
-                tokio::spawn(async move { Self::chapters_urls_single(&myself, chunk).await });
+            let handle = tokio::spawn(async move {
+                {
+                    let mut chunk_urls = Vec::new();
+
+                    for chapter in chunk {
+                        let url = chapter.cur_path_name(&myself.i.as_str()).await;
+                        for page in 1..chapter.Page.parse::<usize>().unwrap() {
+                            chunk_urls.push(format!(
+                                "https://{}/manga/{}{}/{:0>4}-{:0>3}.png",
+                                url,
+                                &myself.i,
+                                chapter.directory(),
+                                chapter.to_url_id(),
+                                page
+                            ));
+                        }
+                    }
+                    chunk_urls
+                }
+            });
             handles.push(handle);
         }
 
@@ -53,25 +71,6 @@ impl Manga {
         for handle in handles {
             let mut one_chapters_urls = handle.await.unwrap();
             urls.append(&mut one_chapters_urls);
-        }
-        urls
-    }
-
-    pub async fn chapters_urls_single(&self, chapters: Vec<Chapter>) -> Vec<String> {
-        let mut urls = Vec::new();
-
-        for chapter in chapters {
-            let url = chapter.cur_path_name(self.i.as_str()).await.unwrap();
-            for page in 1..chapter.Page.parse::<usize>().unwrap() {
-                urls.push(format!(
-                    "https://{}/manga/{}{}/{:0>4}-{:0>3}.png",
-                    url,
-                    self.i,
-                    chapter.directory(),
-                    chapter.to_url_id(),
-                    page
-                ));
-            }
         }
         urls
     }
@@ -89,6 +88,7 @@ impl Manga {
         )?)
     }
 
+    #[must_use]
     pub fn filter_manga(genres: Vec<String>, manga: Vec<Manga>) -> Option<Vec<Manga>> {
         let mut filtered_manga = manga;
         for genre in genres {

@@ -1,5 +1,5 @@
-use std::time::Duration;
 use crossterm::style::Stylize;
+use std::time::Duration;
 
 use inquire::{
     ui::{Color, RenderConfig, StyleSheet, Styled},
@@ -18,7 +18,6 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     // Use theme only for linux builds. Comment out for windows builds.
     inquire::set_global_render_config(get_render_config());
 
-
     let future_manga = tokio::spawn(async move {
         loop {
             match Manga::all_manga_list().await {
@@ -30,12 +29,13 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
             }
         }
     });
-    
+
+    use enum_iterator::all;
 
     let save_type = loop {
         if let Ok(save_type) = Select::new(
             "How would you like to save?",
-            vec![SaveType::Urls, SaveType::Images],
+            all::<SaveType>().collect::<Vec<_>>(),
         )
         .prompt()
         {
@@ -46,6 +46,28 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     let download_type = match save_type {
         SaveType::Urls => DownloadType::Single,
+        SaveType::PdfSplit => loop {
+            if let Ok(download_type) = Select::new(
+                "How would you like to download?",
+                vec![DownloadType::Single, DownloadType::Multi],
+            )
+            .prompt()
+            {
+                break download_type;
+            }
+            eprintln!("{}", "Please select an option.".red().slow_blink());
+        },
+        SaveType::PdfSingle => loop {
+            if let Ok(download_type) = Select::new(
+                "How would you like to download?",
+                vec![DownloadType::Single, DownloadType::Multi],
+            )
+            .prompt()
+            {
+                break download_type;
+            }
+            eprintln!("{}", "Please select an option.".red().slow_blink());
+        },
         SaveType::Images => loop {
             if let Ok(download_type) = Select::new(
                 "How would you like to download?",
@@ -78,7 +100,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     let genres = loop {
         if let Ok(genres) = MultiSelect::new(
-            &format!("Select Genre(s) {}","Skip with ESC".yellow().italic()),
+            &format!("Select Genre(s) {}", "Skip with ESC".yellow().italic()),
             Manga::find_all_genre(&manga).await,
         )
         .prompt_skippable()
@@ -86,7 +108,9 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
             if genres.is_some() && genres.clone().unwrap().is_empty() {
                 eprintln!(
                     "{}",
-                    "Please skip with the ESC button or Select Genre(s)".red().slow_blink()
+                    "Please skip with the ESC button or Select Genre(s)"
+                        .red()
+                        .slow_blink()
                 );
                 continue;
             }
@@ -97,7 +121,12 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let ans = if let Some(..) = genres {
         let selection_manga = Manga::filter_manga(genres.unwrap(), manga);
         if selection_manga.is_none() || selection_manga.clone().unwrap().is_empty() {
-            println!("{}", "No manga with such genres found, closing program".blue().rapid_blink());
+            println!(
+                "{}",
+                "No manga with such genres found, closing program"
+                    .blue()
+                    .rapid_blink()
+            );
             sleep(Duration::from_secs(3)).await;
             // Restart?
             return Ok(());
@@ -129,7 +158,10 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         .prompt()
         {
             if chapters.is_empty() {
-                eprintln!("{}", "Please select at least one chapter".red().slow_blink());
+                eprintln!(
+                    "{}",
+                    "Please select at least one chapter".red().slow_blink()
+                );
                 continue;
             }
             break chapters;
@@ -139,7 +171,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     fetch::download_manga(ans, chapters, save_type, download_type, treads, true).await;
     //fetch::download_manga(ans, chapters, save_type, download_type, treads, false).await; // For windows builds
-    
+
     Ok(())
 }
 

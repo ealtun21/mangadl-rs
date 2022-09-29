@@ -1,16 +1,22 @@
 use std::fmt::{Display, Formatter};
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+use enum_iterator::Sequence;
+
+#[derive(Debug, Clone, PartialEq, Eq, Sequence)]
 pub enum SaveType {
-    Urls,
     Images,
+    PdfSplit,
+    PdfSingle,
+    Urls,
 }
 
 impl Display for SaveType {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         match self {
-            SaveType::Urls => write!(f, "List of URLS"),
-            SaveType::Images => write!(f, "Images inside Folders"),
+            SaveType::Urls => write!(f, "Text file of URLS (Fastest Save) (Lowest RAM Usage)"),
+            SaveType::PdfSplit => write!(f, "Multiple Pdfs split by Chapters (Slow Save) (High RAM Usage)"),
+            SaveType::PdfSingle => write!(f, "Single Pdf (Slowest Save) (High RAM Usage)"),
+            SaveType::Images => write!(f, "Folder containing images (Fast Save) (Low RAM Usage)"),
         }
     }
 }
