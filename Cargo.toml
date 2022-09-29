@@ -18,7 +18,6 @@ inquire = "0.3.0"
 manic = "0.8.1"
 indicatif = { version = "0.17.0", features = ["tokio"] }
 crossterm = "0.25.0"
-enum-iterator = "1.2.0"
 image_to_pdf = { git = "https://github.com/ealtun21/image-to-pdf" }
 printpdf = { version = "0.5.3", features = ["embedded_images"] }
 rayon = "1.5.3"

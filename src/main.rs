@@ -30,12 +30,11 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         }
     });
 
-    use enum_iterator::all;
 
     let save_type = loop {
         if let Ok(save_type) = Select::new(
             "How would you like to save?",
-            all::<SaveType>().collect::<Vec<_>>(),
+            vec![SaveType::PdfSplit, SaveType::PdfSingle, SaveType::Images, SaveType::Urls],
         )
         .prompt()
         {

@@ -1,8 +1,6 @@
 use std::fmt::{Display, Formatter};
 
-use enum_iterator::Sequence;
-
-#[derive(Debug, Clone, PartialEq, Eq, Sequence)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub enum SaveType {
     Images,
     PdfSplit,
