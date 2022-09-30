@@ -29,7 +29,7 @@ pub async fn download_manga(
     unicode: bool,
 ) {
     println!("Fetching urls...");
-    let urls = manga.chapters_urls(unicode, chapters).await;
+    let urls = manga.chapters_urls(threads.into(), unicode, chapters).await;
     match (save_type, download_type) {
         (SaveType::Urls, _) => urls_download(urls, &manga),
         (SaveType::Images, DownloadType::Single) => {
@@ -39,15 +39,26 @@ pub async fn download_manga(
             images_download(false, unicode, urls, &manga, threads.into()).await;
         }
         (SaveType::PdfSingle, DownloadType::Single) => {
-            save_to_pdf(download_to_ram(unicode, urls, 1).await, &manga).await
+            save_to_pdf(download_to_ram(unicode, urls, 1).await, &manga).await;
         }
         (SaveType::PdfSingle, DownloadType::Multi) => {
-            save_to_pdf(download_to_ram(unicode, urls, threads.into()).await, &manga).await
+            save_to_pdf(download_to_ram(unicode, urls, threads.into()).await, &manga).await;
         }
-        (SaveType::PdfSplit, DownloadType::Single) => save_to_pdf_split_chapters(download_to_ram(unicode, urls, 1).await, &manga).await,
-        (SaveType::PdfSplit, DownloadType::Multi) => save_to_pdf_split_chapters(download_to_ram(unicode, urls, threads.into()).await, &manga).await,
-        (SaveType::ImagesChapter, DownloadType::Single) => images_download(true, unicode, urls, &manga, 1).await,
-        (SaveType::ImagesChapter, DownloadType::Multi) => images_download(true, unicode, urls, &manga, threads.into()).await,
+        (SaveType::PdfSplit, DownloadType::Single) => {
+            save_to_pdf_split_chapters(download_to_ram(unicode, urls, 1).await, &manga);
+        }
+        (SaveType::PdfSplit, DownloadType::Multi) => {
+            save_to_pdf_split_chapters(
+                download_to_ram(unicode, urls, threads.into()).await,
+                &manga,
+            );
+        }
+        (SaveType::ImagesChapter, DownloadType::Single) => {
+            images_download(true, unicode, urls, &manga, 1).await;
+        }
+        (SaveType::ImagesChapter, DownloadType::Multi) => {
+            images_download(true, unicode, urls, &manga, threads.into()).await;
+        }
     }
 }
 
@@ -60,7 +71,13 @@ pub fn urls_download(urls: Vec<String>, manga: &Manga) {
     }
 }
 
-pub async fn images_download(folder: bool, unicode: bool, urls: Vec<String>, manga: &Manga, threads: usize) {
+pub async fn images_download(
+    folder: bool,
+    unicode: bool,
+    urls: Vec<String>,
+    manga: &Manga,
+    threads: usize,
+) {
     println!("Downlading images...");
     // Set progress bar
     let m = MultiProgress::new();
@@ -136,7 +153,7 @@ pub async fn images_download(folder: bool, unicode: bool, urls: Vec<String>, man
                         }
                     }
                 };
-                
+
                 let path = if folder {
                     format!(
                         "{name}/{chapter}/{page}",
@@ -255,11 +272,10 @@ pub async fn download_to_ram(
     let mut images = BTreeMap::new();
     // Wait for all threads to finish.
     for handle in handles {
-        images.extend(handle.await.unwrap())
+        images.extend(handle.await.unwrap());
     }
     images
 }
-
 
 pub async fn save_to_pdf(images: BTreeMap<String, DynamicImage>, manga: &Manga) {
     println!("Saving to a pdf...");
@@ -271,10 +287,9 @@ pub async fn save_to_pdf(images: BTreeMap<String, DynamicImage>, manga: &Manga) 
         .unwrap();
 }
 
-
-pub async fn save_to_pdf_split_chapters(images: BTreeMap<String, DynamicImage>, manga: &Manga) {
+pub fn save_to_pdf_split_chapters(images: BTreeMap<String, DynamicImage>, manga: &Manga) {
     println!("Saving to pdfs...");
-    // The string is in the format {:0>4}-{:0>3} where the first number is the chapter and the second is the page.
+    // images: The string is in the format {:0>4}-{:0>3} where the first number is the chapter and the second is the page.
     let mut images_split = BTreeMap::new();
     for (i, img) in images {
         let chapter = i.split('-').next().unwrap();
@@ -291,5 +306,4 @@ pub async fn save_to_pdf_split_chapters(images: BTreeMap<String, DynamicImage>, 
             .create_pdf(&mut BufWriter::new(out_file))
             .unwrap();
     });
-        
 }

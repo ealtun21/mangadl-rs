@@ -1,5 +1,5 @@
-use indicatif::{MultiProgress, ProgressStyle, ProgressBar};
-use rayon::{slice::ParallelSliceMut};
+use indicatif::{MultiProgress, ProgressBar, ProgressStyle};
+use rayon::slice::ParallelSliceMut;
 use regex::Regex;
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
@@ -31,8 +31,13 @@ pub struct Manga {
 }
 
 impl Manga {
-    pub async fn chapters_urls(&self, unicode: bool, chapters: Vec<Chapter>) -> Vec<String> {
-         // Set progress bar
+    pub async fn chapters_urls(
+        &self,
+        threads: usize,
+        unicode: bool,
+        chapters: Vec<Chapter>,
+    ) -> Vec<String> {
+        // Set progress bar
         let m = MultiProgress::new();
 
         let sty = if unicode {
@@ -48,17 +53,15 @@ impl Manga {
             .progress_chars("#>-")
         };
 
-        const TREADS: usize = 16;
-
         let mut urls = Vec::new();
-     
+
         // Split urls into <threads> parts.
         let mut chapters_split = Vec::new();
-        for _ in 0..TREADS {
+        for _ in 0..threads {
             chapters_split.push(Vec::new());
         }
         for (i, url) in chapters.iter().enumerate() {
-            chapters_split[i % TREADS].push(url.clone());
+            chapters_split[i % threads].push(url.clone());
         }
 
         let mut chapter_for_progress = chapters_split.clone();
@@ -73,7 +76,7 @@ impl Manga {
             )),
         );
 
-        for _ in 0..TREADS - 1 {
+        for _ in 0..threads - 1 {
             progress_bars.push(
                 m.insert_after(
                     &progress_bars
@@ -92,21 +95,21 @@ impl Manga {
 
         for (i, bar) in progress_bars.iter().enumerate() {
             bar.set_style(sty.clone());
-            bar.set_message(format!("Url Part {}", i + 1));
+            bar.set_message(format!("Chapter's Urls Part {}", i + 1));
         }
 
         // Spawn a tread for each chunk
         let mut handles = Vec::new();
         for (chunk, bar) in chapters_split.into_iter().zip(progress_bars) {
             let myself = self.clone();
-            let chunk = chunk.to_vec();
+            let chunk = chunk.clone();
             let handle = tokio::spawn(async move {
                 {
                     let mut chunk_urls = Vec::new();
 
                     for chapter in chunk {
                         bar.inc(1);
-                        let url = chapter.cur_path_name(&myself.i.as_str()).await;
+                        let url = chapter.cur_path_name(myself.i.as_str()).await;
                         for page in 1..chapter.Page.parse::<usize>().unwrap() {
                             chunk_urls.push(format!(
                                 "https://{}/manga/{}{}/{:0>4}-{:0>3}.png",

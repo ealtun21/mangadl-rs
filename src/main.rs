@@ -30,11 +30,16 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         }
     });
 
-
     let save_type = loop {
         if let Ok(save_type) = Select::new(
             "How would you like to save?",
-            vec![SaveType::PdfSplit, SaveType::PdfSingle, SaveType::Images, SaveType::ImagesChapter, SaveType::Urls],
+            vec![
+                SaveType::PdfSplit,
+                SaveType::PdfSingle,
+                SaveType::Images,
+                SaveType::ImagesChapter,
+                SaveType::Urls,
+            ],
         )
         .prompt()
         {
@@ -45,53 +50,35 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     let download_type = match save_type {
         SaveType::Urls => DownloadType::Single,
-        SaveType::ImagesChapter => loop {
-            if let Ok(download_type) = Select::new(
-                "How would you like to download?",
-                vec![DownloadType::Single, DownloadType::Multi],
-            )
-            .prompt()
-            {
-                break download_type;
+        SaveType::ImagesChapter | SaveType::Images | SaveType::PdfSingle | SaveType::PdfSplit => {
+            loop {
+                if let Ok(download_type) = Select::new(
+                    "How would you like to download?",
+                    vec![DownloadType::Single, DownloadType::Multi],
+                )
+                .prompt()
+                {
+                    break download_type;
+                }
+                eprintln!("{}", "Please select an option.".red().slow_blink());
             }
-            eprintln!("{}", "Please select an option.".red().slow_blink());
-        },
-        SaveType::PdfSplit => loop {
-            if let Ok(download_type) = Select::new(
-                "How would you like to download?",
-                vec![DownloadType::Single, DownloadType::Multi],
-            )
-            .prompt()
-            {
-                break download_type;
-            }
-            eprintln!("{}", "Please select an option.".red().slow_blink());
-        },
-        SaveType::PdfSingle => loop {
-            if let Ok(download_type) = Select::new(
-                "How would you like to download?",
-                vec![DownloadType::Single, DownloadType::Multi],
-            )
-            .prompt()
-            {
-                break download_type;
-            }
-            eprintln!("{}", "Please select an option.".red().slow_blink());
-        },
-        SaveType::Images => loop {
-            if let Ok(download_type) = Select::new(
-                "How would you like to download?",
-                vec![DownloadType::Single, DownloadType::Multi],
-            )
-            .prompt()
-            {
-                break download_type;
-            }
-            eprintln!("{}", "Please select an option.".red().slow_blink());
-        },
+        }
     };
 
     let mut treads: u8 = 1;
+
+    if let SaveType::Urls = save_type {
+        treads = loop {
+            if let Ok(treads) = CustomType::new("Number of Threads: ")
+                .with_error_message("Please type a valid number")
+                .with_help_message("Type the amount of threads you want to use")
+                .prompt()
+            {
+                break treads;
+            }
+            eprintln!("{}", "Please enter amount of threads".red().slow_blink());
+        };
+    }
 
     if let DownloadType::Multi = download_type {
         treads = loop {
@@ -109,12 +96,11 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let manga = future_manga.await.unwrap();
 
     let genres = loop {
-        if let Ok(genres) = MultiSelect::new(
-            &format!("Select Genre(s)"),
-            Manga::find_all_genre(&manga).await,
-        )
-        .with_help_message("esc to skip, ↑↓ to move, space to select one, → to all, ← to none, type to filter")
-        .prompt_skippable()
+        if let Ok(genres) = MultiSelect::new("Select Genre(s)", Manga::find_all_genre(&manga).await)
+            .with_help_message(
+                "esc to skip, ↑↓ to move, space to select one, → to all, ← to none, type to filter",
+            )
+            .prompt_skippable()
         {
             if genres.is_some() && genres.clone().unwrap().is_empty() {
                 eprintln!(
