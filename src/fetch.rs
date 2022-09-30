@@ -28,7 +28,8 @@ pub async fn download_manga(
     threads: u8,
     unicode: bool,
 ) {
-    let urls = manga.chapters_urls(chapters).await;
+    println!("Fetching urls...");
+    let urls = manga.chapters_urls(unicode, chapters).await;
     match (save_type, download_type) {
         (SaveType::Urls, _) => urls_download(urls, &manga),
         (SaveType::Images, DownloadType::Single) => {
@@ -52,7 +53,6 @@ pub async fn download_manga(
 
 // Download urls seperated by a a line into a 1 text file named the manga.
 pub fn urls_download(urls: Vec<String>, manga: &Manga) {
-    println!("Fetching urls...");
     let mut file = File::create(format!("{}.txt", manga.i)).expect("Failed to create file");
     for url in urls {
         file.write_all(format!("{}\n", url).as_bytes())
@@ -78,7 +78,7 @@ pub async fn images_download(folder: bool, unicode: bool, urls: Vec<String>, man
         .progress_chars("#>-")
     };
 
-    // Split urls into 16 parts.
+    // Split urls into <threads> parts.
     let mut urls_split = Vec::new();
     for _ in 0..threads {
         urls_split.push(Vec::new());

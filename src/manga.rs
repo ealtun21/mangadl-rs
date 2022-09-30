@@ -1,3 +1,5 @@
+use indicatif::{MultiProgress, ProgressStyle, ProgressBar};
+use rayon::{prelude::{IntoParallelRefIterator, IntoParallelIterator}, slice::ParallelSliceMut};
 use regex::Regex;
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
@@ -29,19 +31,73 @@ pub struct Manga {
 }
 
 impl Manga {
-    pub async fn chapters_urls(&self, chapters: Vec<Chapter>) -> Vec<String> {
-        let mut urls = Vec::new();
+    pub async fn chapters_urls(&self, unicode: bool, chapters: Vec<Chapter>) -> Vec<String> {
+         // Set progress bar
+        let m = MultiProgress::new();
 
-        // Split chapters into 16 chunks
-        let chunks = chapters.chunks(if chapters.len() / 16 == 0 {
-            1
+        let sty = if unicode {
+            ProgressStyle::with_template(
+                "{spinner:.green} [{elapsed_precise}] {bar:40.cyan/blue} {pos:>7}/{len:7} {msg}",
+            )
+            .unwrap()
         } else {
-            chapters.len() / 16
-        });
+            ProgressStyle::with_template(
+                "[{elapsed_precise}] {bar:40.cyan/blue} {pos:>7}/{len:7} {msg}",
+            )
+            .expect("Failed to create progress style")
+            .progress_chars("#>-")
+        };
+
+        const TREADS: usize = 16;
+
+        let mut urls = Vec::new();
+     
+        // Split urls into <threads> parts.
+        let mut chapters_split = Vec::new();
+        for _ in 0..TREADS {
+            chapters_split.push(Vec::new());
+        }
+        for (i, url) in chapters.iter().enumerate() {
+            chapters_split[i % TREADS].push(url.clone());
+        }
+
+        let mut chapter_for_progress = chapters_split.clone();
+
+        let mut progress_bars = Vec::new();
+        progress_bars.push(
+            m.add(ProgressBar::new(
+                chapter_for_progress
+                    .pop()
+                    .expect("failed to get previous url")
+                    .len() as u64,
+            )),
+        );
+
+        for _ in 0..TREADS - 1 {
+            progress_bars.push(
+                m.insert_after(
+                    &progress_bars
+                        .clone()
+                        .pop()
+                        .expect("failed to get previous bar to insert after"),
+                    ProgressBar::new(
+                        chapter_for_progress
+                            .pop()
+                            .expect("failed to get url len for bar")
+                            .len() as u64,
+                    ),
+                ),
+            );
+        }
+
+        for (i, bar) in progress_bars.iter().enumerate() {
+            bar.set_style(sty.clone());
+            bar.set_message(format!("Url Part {}", i));
+        }
 
         // Spawn a tread for each chunk
         let mut handles = Vec::new();
-        for chunk in chunks {
+        for (chunk, bar) in chapters_split.into_iter().zip(progress_bars) {
             let myself = self.clone();
             let chunk = chunk.to_vec();
             let handle = tokio::spawn(async move {
@@ -49,6 +105,7 @@ impl Manga {
                     let mut chunk_urls = Vec::new();
 
                     for chapter in chunk {
+                        bar.inc(1);
                         let url = chapter.cur_path_name(&myself.i.as_str()).await;
                         for page in 1..chapter.Page.parse::<usize>().unwrap() {
                             chunk_urls.push(format!(
@@ -72,6 +129,7 @@ impl Manga {
             let mut one_chapters_urls = handle.await.unwrap();
             urls.append(&mut one_chapters_urls);
         }
+        urls.par_sort();
         urls
     }
 
