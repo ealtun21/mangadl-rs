@@ -1,5 +1,5 @@
 use indicatif::{MultiProgress, ProgressStyle, ProgressBar};
-use rayon::{prelude::{IntoParallelRefIterator, IntoParallelIterator}, slice::ParallelSliceMut};
+use rayon::{slice::ParallelSliceMut};
 use regex::Regex;
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
@@ -92,7 +92,7 @@ impl Manga {
 
         for (i, bar) in progress_bars.iter().enumerate() {
             bar.set_style(sty.clone());
-            bar.set_message(format!("Url Part {}", i));
+            bar.set_message(format!("Url Part {}", i + 1));
         }
 
         // Spawn a tread for each chunk
