@@ -39,18 +39,24 @@ pub async fn download_manga(
             images_download(false, unicode, urls, &manga, threads.into()).await;
         }
         (SaveType::PdfSingle, DownloadType::Single) => {
-            save_to_pdf(download_to_ram(unicode, urls, 1).await, &manga).await;
+            save_to_pdf(download_to_ram(unicode, urls, 1).await, &manga, unicode).await;
         }
         (SaveType::PdfSingle, DownloadType::Multi) => {
-            save_to_pdf(download_to_ram(unicode, urls, threads.into()).await, &manga).await;
+            save_to_pdf(
+                download_to_ram(unicode, urls, threads.into()).await,
+                &manga,
+                unicode,
+            )
+            .await;
         }
         (SaveType::PdfSplit, DownloadType::Single) => {
-            save_to_pdf_split_chapters(download_to_ram(unicode, urls, 1).await, &manga);
+            save_to_pdf_split_chapters(download_to_ram(unicode, urls, 1).await, &manga, unicode);
         }
         (SaveType::PdfSplit, DownloadType::Multi) => {
             save_to_pdf_split_chapters(
                 download_to_ram(unicode, urls, threads.into()).await,
                 &manga,
+                unicode,
             );
         }
         (SaveType::ImagesChapter, DownloadType::Single) => {
@@ -206,7 +212,7 @@ pub async fn download_to_ram(
         .progress_chars("#>-")
     };
 
-    // Split urls into 16 parts.
+    // Split urls into <threads> parts.
     let mut urls_split = Vec::new();
     for _ in 0..threads {
         urls_split.push(Vec::new());
@@ -277,19 +283,40 @@ pub async fn download_to_ram(
     images
 }
 
-pub async fn save_to_pdf(images: BTreeMap<String, DynamicImage>, manga: &Manga) {
-    println!("Saving to a pdf...");
+pub async fn save_to_pdf(images: BTreeMap<String, DynamicImage>, manga: &Manga, unicode: bool) {
+    println!("Adding images to a pdf...");
     let out_file = File::create(format!("{}.pdf", manga.i)).unwrap();
 
-    ImageToPdf::new()
+    let m = MultiProgress::new();
+
+    let sty = if unicode {
+        ProgressStyle::with_template(
+            "{spinner:.green} [{elapsed_precise}] {bar:40.cyan/blue} {pos:>7}/{len:7} {msg}",
+        )
+        .unwrap()
+    } else {
+        ProgressStyle::with_template(
+            "[{elapsed_precise}] {bar:40.cyan/blue} {pos:>7}/{len:7} {msg}",
+        )
+        .expect("Failed to create progress style")
+        .progress_chars("#>-")
+    };
+
+    let pdf = ImageToPdf::default()
         .add_images_par(images.into_par_iter().map(|(_, img)| img))
-        .create_pdf(&mut BufWriter::new(out_file))
-        .unwrap();
+        .set_document_title(format!("{}.pdf", manga.i))
+        .create_with_progress_first_pdf(sty, m);
+
+    println!("Saving to file...");
+    pdf.save(&mut BufWriter::new(out_file)).unwrap();
 }
 
-pub fn save_to_pdf_split_chapters(images: BTreeMap<String, DynamicImage>, manga: &Manga) {
-    println!("Saving to pdfs...");
-    // images: The string is in the format {:0>4}-{:0>3} where the first number is the chapter and the second is the page.
+pub fn save_to_pdf_split_chapters(
+    images: BTreeMap<String, DynamicImage>,
+    manga: &Manga,
+    unicode: bool,
+) {
+    println!("Adding images to pdfs...");
     let mut images_split = BTreeMap::new();
     for (i, img) in images {
         let chapter = i.split('-').next().unwrap();
@@ -298,12 +325,31 @@ pub fn save_to_pdf_split_chapters(images: BTreeMap<String, DynamicImage>, manga:
             .or_insert_with(Vec::new)
             .push(img);
     }
+    let sty = if unicode {
+        ProgressStyle::with_template(
+            "{spinner:.green} [{elapsed_precise}] {bar:40.cyan/blue} {pos:>7}/{len:7} {msg}",
+        )
+        .unwrap()
+    } else {
+        ProgressStyle::with_template(
+            "[{elapsed_precise}] {bar:40.cyan/blue} {pos:>7}/{len:7} {msg}",
+        )
+        .expect("Failed to create progress style")
+        .progress_chars("#>-")
+    };
+
+    println!("Saving to file...");
+    let progress_bar = ProgressBar::new(images_split.keys().len() as u64).with_style(sty);
+
     images_split.into_par_iter().for_each(|(chapter, images)| {
         let out_file = File::create(format!("{}-{}.pdf", manga.i, chapter)).unwrap();
 
-        ImageToPdf::new()
+        let pdf = ImageToPdf::default()
             .add_images_par(images.into_par_iter())
-            .create_pdf(&mut BufWriter::new(out_file))
-            .unwrap();
+            .set_document_title(format!("{}-{}.pdf", manga.i, chapter))
+            .create_pdf();
+
+        pdf.save(&mut BufWriter::new(out_file)).unwrap();
+        progress_bar.inc(1);
     });
 }

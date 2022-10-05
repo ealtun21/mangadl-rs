@@ -1,6 +1,6 @@
 [package]
 name = "mangadl-rs"
-version = "0.1.12"
+version = "0.1.13"
 edition = "2021"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
@@ -18,9 +18,9 @@ inquire = "0.3.0"
 manic = "0.8.1"
 indicatif = { version = "0.17.0", features = ["tokio"] }
 crossterm = "0.25.0"
-image_to_pdf = { git = "https://github.com/ealtun21/image-to-pdf" }
 printpdf = { version = "0.5.3", features = ["embedded_images"] }
 rayon = "1.5.3"
+image_to_pdf = { git = "https://github.com/ealtun21/image-to-pdf", version = "0.6.0", features = ["progress"] }
 
 
 [profile.release]
