@@ -11,6 +11,10 @@ pub enum SaveType {
     Urls,
 }
 
+pub enum Test1 {
+    Images,
+}
+
 impl Display for SaveType {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         match self {
