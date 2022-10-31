@@ -5,7 +5,7 @@ use serde::{Deserialize, Serialize};
 use serde_json::Value;
 use std::fmt::{Display, Formatter};
 
-use crate::chapter::Chapter;
+use crate::{chapter::Chapter, types::Thread};
 
 const URL: &str = "https://mangasee123.com/";
 
@@ -33,7 +33,7 @@ pub struct Manga {
 impl Manga {
     pub async fn chapters_urls(
         &self,
-        threads: usize,
+        threads: Thread,
         unicode: bool,
         chapters: Vec<Chapter>,
     ) -> Vec<String> {
@@ -57,11 +57,11 @@ impl Manga {
 
         // Split urls into <threads> parts.
         let mut chapters_split = Vec::new();
-        for _ in 0..threads {
+        for _ in 0..threads.get() {
             chapters_split.push(Vec::new());
         }
         for (i, url) in chapters.iter().enumerate() {
-            chapters_split[i % threads].push(url.clone());
+            chapters_split[i % threads.get() as usize].push(url.clone());
         }
 
         let mut chapter_for_progress = chapters_split.clone();
@@ -76,7 +76,7 @@ impl Manga {
             )),
         );
 
-        for _ in 0..threads - 1 {
+        for _ in 0..threads.get() - 1 {
             progress_bars.push(
                 m.insert_after(
                     &progress_bars
@@ -146,7 +146,8 @@ impl Manga {
                 .get(1)
                 .expect("Failed to get manga list")
                 .as_str(),
-        )?)
+        )
+        .unwrap())
     }
 
     #[must_use]

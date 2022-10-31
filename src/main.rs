@@ -9,7 +9,7 @@ use mangadl_rs::{
     chapter::Chapter,
     fetch,
     manga::Manga,
-    types::{DownloadType, SaveType},
+    types::{DownloadType, SaveType, Thread},
 };
 use tokio::time::sleep;
 
@@ -65,7 +65,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         }
     };
 
-    let mut treads: u8 = 1;
+    let mut treads: Thread = Thread::new(1).unwrap();
 
     if let SaveType::Urls = save_type {
         treads = loop {

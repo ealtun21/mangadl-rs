@@ -10,7 +10,7 @@ use tokio::fs;
 use crate::{
     chapter::Chapter,
     manga::Manga,
-    types::{DownloadType, SaveType},
+    types::{DownloadType, SaveType, Thread},
 };
 
 pub async fn get_img(url: &str) -> Result<DynamicImage, reqwest::Error> {
@@ -25,25 +25,25 @@ pub async fn download_manga(
     chapters: Vec<Chapter>,
     save_type: SaveType,
     download_type: DownloadType,
-    threads: u8,
+    threads: Thread,
     unicode: bool,
 ) {
     println!("Fetching urls...");
-    let urls = manga.chapters_urls(threads.into(), unicode, chapters).await;
+    let urls = manga.chapters_urls(threads, unicode, chapters).await;
     match (save_type, download_type) {
         (SaveType::Urls, _) => urls_download(urls, &manga),
         (SaveType::Images, DownloadType::Single) => {
             images_download(false, unicode, urls, &manga, 1).await;
         }
         (SaveType::Images, DownloadType::Multi) => {
-            images_download(false, unicode, urls, &manga, threads.into()).await;
+            images_download(false, unicode, urls, &manga, threads.get() as usize).await;
         }
         (SaveType::PdfSingle, DownloadType::Single) => {
             save_to_pdf(download_to_ram(unicode, urls, 1).await, &manga, unicode).await;
         }
         (SaveType::PdfSingle, DownloadType::Multi) => {
             save_to_pdf(
-                download_to_ram(unicode, urls, threads.into()).await,
+                download_to_ram(unicode, urls, threads.get() as usize).await,
                 &manga,
                 unicode,
             )
@@ -54,7 +54,7 @@ pub async fn download_manga(
         }
         (SaveType::PdfSplit, DownloadType::Multi) => {
             save_to_pdf_split_chapters(
-                download_to_ram(unicode, urls, threads.into()).await,
+                download_to_ram(unicode, urls, threads.get() as usize).await,
                 &manga,
                 unicode,
             );
@@ -63,7 +63,7 @@ pub async fn download_manga(
             images_download(true, unicode, urls, &manga, 1).await;
         }
         (SaveType::ImagesChapter, DownloadType::Multi) => {
-            images_download(true, unicode, urls, &manga, threads.into()).await;
+            images_download(true, unicode, urls, &manga, threads.get() as usize).await;
         }
     }
 }

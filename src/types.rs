@@ -1,4 +1,4 @@
-use std::fmt::{Display, Formatter};
+use std::{fmt::{Display, Formatter}, error::Error, str::FromStr};
 
 use crossterm::style::Stylize;
 
@@ -69,5 +69,41 @@ impl Display for DownloadType {
             DownloadType::Single => write!(f, "Single-Threaded"),
             DownloadType::Multi => write!(f, "Multi-Threaded"),
         }
+    }
+}
+
+#[derive(Debug, Copy, Clone, PartialEq, Eq)]
+pub struct Thread {
+    amount: u8,
+}
+
+impl Thread {
+    pub fn new(amount: u8) -> Result<Self, Box<dyn Error>> {
+        if amount > 0{
+            Ok(Self { amount })
+        } else {
+            Err("Amount of threads must be larger then 0".into())
+        }
+    }
+
+    pub fn get(&self) -> u8 {
+        self.amount
+    }
+}
+
+impl Display for Thread {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Thread { amount } => write!(f, "{}", amount),
+        }
+    }
+}
+
+impl FromStr for Thread {
+    type Err = Box<dyn Error>;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        let amount = s.parse::<u8>()?;
+        Self::new(amount)
     }
 }
