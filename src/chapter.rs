@@ -36,7 +36,7 @@ impl ChapterInfo {
         )?)
     }
 
-    pub async fn to_url_id(&self) -> String {
+    pub fn to_url_id(&self) -> String {
         let chapter = self.Chapter[1..self.Chapter.len() - 1].to_string();
         let odd = self.Chapter[self.Chapter.len() - 1..].to_string();
         if odd == "0" {
@@ -49,7 +49,7 @@ impl ChapterInfo {
     pub async fn url_id_list(chapters: Vec<ChapterInfo>) -> Vec<String> {
         let mut url_id_list = Vec::new();
         for chapter in chapters {
-            url_id_list.push(chapter.to_url_id().await);
+            url_id_list.push(chapter.to_url_id());
         }
         url_id_list
     }
@@ -63,11 +63,25 @@ pub struct Chapter {
 }
 
 impl Chapter {
-    pub async fn list(manga_id: &str) -> Result<Vec<Chapter>, Box<dyn std::error::Error>> {
-        let page = reqwest::get(format!("{URL}read-online/{manga_id}-chapter-1.html"))
-            .await?
-            .text()
-            .await?;
+    pub async fn list(
+        manga_id: &str,
+        valid_chapter: &str,
+    ) -> Result<Vec<Chapter>, Box<dyn std::error::Error>> {
+        let chapter = valid_chapter[1..valid_chapter.len() - 1].to_string();
+        let odd = valid_chapter[valid_chapter.len() - 1..].to_string();
+
+        let valid_chapter = if odd == "0" {
+            chapter
+        } else {
+            format!("{}.{}", chapter, odd)
+        };
+
+        let page = reqwest::get(format!(
+            "{URL}read-online/{manga_id}-chapter-{valid_chapter}.html"
+        ))
+        .await?
+        .text()
+        .await?;
         Ok(serde_json::from_str(
             Regex::new(r#"vm\.CHAPTERS = (.*);"#)
                 .expect("Failed to create regex")

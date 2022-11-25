@@ -148,7 +148,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let chapters = loop {
         if let Ok(chapters) = MultiSelect::new(
             "Select Chapters",
-            Chapter::list(&ans.i)
+            Chapter::list(&ans.i, &ans.l)
                 .await
                 .expect("Network Error, try again later."),
         )
