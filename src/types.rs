@@ -1,4 +1,8 @@
-use std::{fmt::{Display, Formatter}, error::Error, str::FromStr};
+use std::{
+    error::Error,
+    fmt::{Display, Formatter},
+    str::FromStr,
+};
 
 use crossterm::style::Stylize;
 
@@ -79,7 +83,7 @@ pub struct Thread {
 
 impl Thread {
     pub fn new(amount: u8) -> Result<Self, Box<dyn Error>> {
-        if amount > 0{
+        if amount > 0 {
             Ok(Self { amount })
         } else {
             Err("Amount of threads must be larger then 0".into())
@@ -93,9 +97,8 @@ impl Thread {
 
 impl Display for Thread {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        match self {
-            Thread { amount } => write!(f, "{}", amount),
-        }
+        let Thread { amount } = self;
+        write!(f, "{}", amount)
     }
 }
 

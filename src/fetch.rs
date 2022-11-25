@@ -39,15 +39,14 @@ pub async fn download_manga(
             images_download(false, unicode, urls, &manga, threads.get() as usize).await;
         }
         (SaveType::PdfSingle, DownloadType::Single) => {
-            save_to_pdf(download_to_ram(unicode, urls, 1).await, &manga, unicode).await;
+            save_to_pdf(download_to_ram(unicode, urls, 1).await, &manga, unicode);
         }
         (SaveType::PdfSingle, DownloadType::Multi) => {
             save_to_pdf(
                 download_to_ram(unicode, urls, threads.get() as usize).await,
                 &manga,
                 unicode,
-            )
-            .await;
+            );
         }
         (SaveType::PdfSplit, DownloadType::Single) => {
             save_to_pdf_split_chapters(download_to_ram(unicode, urls, 1).await, &manga, unicode);
@@ -283,7 +282,7 @@ pub async fn download_to_ram(
     images
 }
 
-pub async fn save_to_pdf(images: BTreeMap<String, DynamicImage>, manga: &Manga, unicode: bool) {
+pub fn save_to_pdf(images: BTreeMap<String, DynamicImage>, manga: &Manga, unicode: bool) {
     println!("Adding images to a pdf...");
     let out_file = File::create(format!("{}.pdf", manga.i)).unwrap();
 

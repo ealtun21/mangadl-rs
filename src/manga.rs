@@ -159,7 +159,7 @@ impl Manga {
         Some(filtered_manga)
     }
 
-    pub async fn find_all_genre(manga: &Vec<Manga>) -> Vec<String> {
+    pub fn find_all_genre(manga: &Vec<Manga>) -> Vec<String> {
         let mut genres: Vec<String> = Vec::new();
         for m in manga {
             for g in &m.g {

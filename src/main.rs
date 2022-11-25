@@ -96,7 +96,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let manga = future_manga.await.unwrap();
 
     let genres = loop {
-        if let Ok(genres) = MultiSelect::new("Select Genre(s)", Manga::find_all_genre(&manga).await)
+        if let Ok(genres) = MultiSelect::new("Select Genre(s)", Manga::find_all_genre(&manga))
             .with_help_message(
                 "esc to skip, ↑↓ to move, space to select one, → to all, ← to none, type to filter",
             )

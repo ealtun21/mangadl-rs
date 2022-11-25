@@ -45,14 +45,6 @@ impl ChapterInfo {
             format!("{}.{}", chapter, odd)
         }
     }
-
-    pub async fn url_id_list(chapters: Vec<ChapterInfo>) -> Vec<String> {
-        let mut url_id_list = Vec::new();
-        for chapter in chapters {
-            url_id_list.push(chapter.to_url_id());
-        }
-        url_id_list
-    }
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
@@ -144,7 +136,7 @@ impl Chapter {
     #[must_use]
     pub fn directory(&self) -> String {
         if self.Directory.is_empty() {
-            "".to_string()
+            String::new()
         } else {
             format!("/{}", self.Directory)
         }
