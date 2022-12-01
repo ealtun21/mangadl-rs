@@ -22,7 +22,7 @@ impl Display for SaveType {
                 f,
                 "{} {} {} {}",
                 "Text".blue(),
-                "Text file of URLS".white(),
+                "Text file of URLS",
                 "(Fastest Save)".dark_green(),
                 "(Lowest RAM Usage)".green()
             ),
@@ -30,7 +30,7 @@ impl Display for SaveType {
                 f,
                 "{} {} {} {}",
                 "PDF".blue(),
-                "Multiple pdfs split by chapters".white(),
+                "Multiple pdfs split by chapters",
                 "(Slow Save)".dark_yellow(),
                 "(High RAM Usage)".red()
             ),
@@ -38,7 +38,7 @@ impl Display for SaveType {
                 f,
                 "{} {} {} {}",
                 "PDF".blue(),
-                "Single pdf".white(),
+                "Single pdf",
                 "(Slowest Save)".dark_red(),
                 "(High RAM Usage)".red()
             ),
@@ -46,7 +46,7 @@ impl Display for SaveType {
                 f,
                 "{} {} {} {}",
                 "Images".blue(),
-                "Multiple folders split by chapters containing images".white(),
+                "Multiple folders split by chapters containing images",
                 "(Fast Save)".green(),
                 "(Low RAM Usage)".green()
             ),
@@ -54,7 +54,7 @@ impl Display for SaveType {
                 f,
                 "{} {} {} {}",
                 "Images".blue(),
-                "Folder containing images".white(),
+                "Folder containing images",
                 "(Fast Save)".green(),
                 "(Low RAM Usage)".green()
             ),
