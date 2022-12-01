@@ -2,6 +2,7 @@ use std::{collections::BTreeMap, fs::File, io::BufWriter, path::Path};
 
 use image_to_pdf::ImageToPdf;
 use indicatif::{MultiProgress, ProgressBar, ProgressStyle};
+use manic::Client;
 use printpdf::image_crate::DynamicImage;
 use rayon::prelude::{IntoParallelIterator, ParallelIterator};
 use std::io::Write;
@@ -13,9 +14,9 @@ use crate::{
     types::{DownloadType, SaveType, Thread},
 };
 
-pub async fn get_img(url: &str) -> Result<DynamicImage, reqwest::Error> {
+pub async fn get_img(client: Client, url: &str) -> Result<DynamicImage, reqwest::Error> {
     Ok(
-        image::load_from_memory(&reqwest::get(url).await?.bytes().await?)
+        image::load_from_memory(&client.get(url).send().await?.bytes().await?)
             .expect("Failed to load image"),
     )
 }
@@ -146,10 +147,11 @@ pub async fn images_download(
     for (urls, bar) in urls_split.into_iter().zip(progress_bars) {
         let manga = manga.clone();
         let handle = tokio::spawn(async move {
+            let client = Client::new();
             for url in urls {
                 bar.inc(1);
                 let img = loop {
-                    match get_img(url.as_str()).await {
+                    match get_img(client.clone(), url.as_str()).await {
                         Ok(img) => break img,
                         Err(e) => {
                             eprintln!("{e}\nFailed to download image, Retrying...");
@@ -255,11 +257,12 @@ pub async fn download_to_ram(
     let mut handles = Vec::new();
     for (urls, bar) in urls_split.into_iter().zip(progress_bars) {
         let handle = tokio::spawn(async move {
+            let client = Client::new();
             let mut images = BTreeMap::new();
             for url in urls {
                 bar.inc(1);
                 let img = loop {
-                    match get_img(url.as_str()).await {
+                    match get_img(client.clone(), url.as_str()).await {
                         Ok(img) => break img,
                         Err(e) => {
                             eprintln!("{e}\nFailed to download image, Retrying...");
