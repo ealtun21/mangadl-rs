@@ -107,7 +107,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
             )
             .prompt_skippable()
         {
-            Ok(ans) => if ans.as_ref().unwrap().is_empty() {
+            Ok(ans) => if ans.as_ref().is_none() || ans.as_ref().unwrap().is_empty() {
                 eprintln!(
                     "{}",
                     "Please skip with the ESC button or Select Genre(s)"
