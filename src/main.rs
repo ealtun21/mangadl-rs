@@ -3,7 +3,7 @@ use std::time::Duration;
 
 use inquire::{
     ui::{Color, RenderConfig, StyleSheet, Styled},
-    CustomType, MultiSelect, Select,
+    CustomType, InquireError, MultiSelect, Select,
 };
 use mangadl_rs::{
     chapter::Chapter,
@@ -31,7 +31,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     });
 
     let save_type = loop {
-        if let Ok(save_type) = Select::new(
+        match Select::new(
             "How would you like to save?",
             vec![
                 SaveType::PdfSplit,
@@ -43,24 +43,26 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         )
         .prompt()
         {
-            break save_type;
+            Ok(k) => break k,
+            Err(InquireError::OperationInterrupted) => return Ok(()),
+            Err(_) => eprintln!("{}", "Please select an option.".red().slow_blink()),
         }
-        eprintln!("{}", "Please select an option.".red().slow_blink());
     };
 
     let download_type = match save_type {
         SaveType::Urls => DownloadType::Single,
         SaveType::ImagesChapter | SaveType::Images | SaveType::PdfSingle | SaveType::PdfSplit => {
             loop {
-                if let Ok(download_type) = Select::new(
+                match Select::new(
                     "How would you like to download?",
                     vec![DownloadType::Single, DownloadType::Multi],
                 )
                 .prompt()
                 {
-                    break download_type;
+                    Ok(ans) => break ans,
+                    Err(InquireError::OperationInterrupted) => return Ok(()),
+                    Err(_) => eprintln!("{}", "Please select an option.".red().slow_blink()),
                 }
-                eprintln!("{}", "Please select an option.".red().slow_blink());
             }
         }
     };
@@ -69,40 +71,43 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     if let SaveType::Urls = save_type {
         treads = loop {
-            if let Ok(treads) = CustomType::new("Number of Threads: ")
+            match CustomType::new("Number of Threads: ")
                 .with_error_message("Please type a valid number")
                 .with_help_message("Type the amount of threads you want to use")
                 .prompt()
             {
-                break treads;
+                Ok(ans) => break ans,
+                Err(InquireError::OperationInterrupted) => return Ok(()),
+                Err(_) => eprintln!("{}", "Please enter amount of threads".red().slow_blink()),
             }
-            eprintln!("{}", "Please enter amount of threads".red().slow_blink());
         };
     }
 
     if let DownloadType::Multi = download_type {
         treads = loop {
-            if let Ok(treads) = CustomType::new("Number of Threads: ")
+            match CustomType::new("Number of Threads: ")
                 .with_error_message("Please type a valid number")
                 .with_help_message("Type the amount of threads you want to use")
                 .prompt()
             {
-                break treads;
+                Ok(ans) => break ans,
+                Err(InquireError::OperationInterrupted) => return Ok(()),
+                Err(_) => eprintln!("{}", "Please enter amount of threads".red().slow_blink()),
             }
-            eprintln!("{}", "Please enter amount of threads".red().slow_blink());
         };
     }
 
     let manga = future_manga.await.unwrap();
 
-    let genres = loop {
-        if let Ok(genres) = MultiSelect::new("Select Genre(s)", Manga::find_all_genre(&manga))
+    let genres =
+        loop {
+            match MultiSelect::new("Select Genre(s)", Manga::find_all_genre(&manga))
             .with_help_message(
                 "esc to skip, ↑↓ to move, space to select one, → to all, ← to none, type to filter",
             )
             .prompt_skippable()
         {
-            if genres.is_some() && genres.clone().unwrap().is_empty() {
+            Ok(ans) => if ans.as_ref().unwrap().is_empty() {
                 eprintln!(
                     "{}",
                     "Please skip with the ESC button or Select Genre(s)"
@@ -110,10 +115,13 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
                         .slow_blink()
                 );
                 continue;
-            }
-            break genres;
+            } else {
+                break ans
+            },
+            Err(InquireError::OperationInterrupted) => return Ok(()),
+            Err(_) => continue,
         }
-    };
+        };
 
     let ans = if let Some(..) = genres {
         let selection_manga = Manga::filter_manga(genres.unwrap(), manga);
@@ -125,23 +133,22 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
                     .rapid_blink()
             );
             sleep(Duration::from_secs(3)).await;
-            // Restart?
             return Ok(());
         }
         loop {
-            if let Ok(ans) =
-                Select::new("Select Manga", selection_manga.as_ref().unwrap().clone()).prompt()
-            {
-                break ans;
+            match Select::new("Select Manga", selection_manga.as_ref().unwrap().clone()).prompt() {
+                Ok(ans) => break ans,
+                Err(InquireError::OperationInterrupted) => return Ok(()),
+                Err(_) => eprintln!("{}", "Please select manga".red().slow_blink()),
             }
-            eprintln!("{}", "Please select manga".red().slow_blink());
         }
     } else {
         loop {
-            if let Ok(ans) = Select::new("Select Manga", manga.clone()).prompt() {
-                break ans;
+            match Select::new("Select Manga", manga.clone()).prompt() {
+                Ok(ans) => break ans,
+                Err(InquireError::OperationInterrupted) => return Ok(()),
+                Err(_) => eprintln!("{}", "Please select manga".red().slow_blink()),
             }
-            eprintln!("{}", "Please select manga".red().slow_blink());
         }
     };
 
