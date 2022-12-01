@@ -21,6 +21,7 @@ crossterm = "0.25.0"
 printpdf = { version = "0.5.3", features = ["embedded_images"] }
 rayon = "1.5.3"
 image_to_pdf = { git = "https://github.com/ealtun21/image-to-pdf", version = "0.6.0", features = ["progress"] }
+brotlic = "0.8.0"
 
 
 [profile.release]

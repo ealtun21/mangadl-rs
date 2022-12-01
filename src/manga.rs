@@ -1,9 +1,13 @@
+use brotlic::DecompressorReader;
 use indicatif::{MultiProgress, ProgressBar, ProgressStyle};
 use rayon::slice::ParallelSliceMut;
 use regex::Regex;
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
-use std::fmt::{Display, Formatter};
+use std::{
+    fmt::{Display, Formatter},
+    io::{BufReader, Read},
+};
 
 use crate::{chapter::Chapter, types::Thread};
 
@@ -137,7 +141,21 @@ impl Manga {
     }
 
     pub async fn all_manga_list() -> Result<Vec<Manga>, Box<dyn std::error::Error>> {
-        let page = reqwest::get(format!("{URL}search/")).await?.text().await?;
+        let bin = reqwest::Client::new()
+            .get(format!("{URL}search/").as_str())
+            .header("Accept-Encoding", "br")
+            .send()
+            .await?
+            .bytes()
+            .await?;
+
+        // Convert the brotli compressed bytes to a string
+        let mut reader = BufReader::new(bin.as_ref());
+        let mut bytes = Vec::new();
+        let mut brotli = DecompressorReader::new(&mut reader);
+        brotli.read_to_end(&mut bytes)?;
+        let page = String::from_utf8(bytes)?;
+
         Ok(serde_json::from_str(
             Regex::new(r#"vm\.Directory = (.*);"#)
                 .expect("Failed to create regex")
