@@ -13,12 +13,13 @@ cargo install --git https://github.com/ealtun21/mangadl-rs
 ```
 
 # Demo
-[![asciicast](https://asciinema.org/a/yTIa2nRQaSwAnmcgtPDIzxuVN.svg)](https://asciinema.org/a/yTIa2nRQaSwAnmcgtPDIzxuVN)
 
-[![asciicast](https://asciinema.org/a/v0ckrb5fTHGHQJ3eUqMQ4FduB.svg)](https://asciinema.org/a/v0ckrb5fTHGHQJ3eUqMQ4FduB)
+[![asciicast](https://asciinema.org/a/eElkFG4szfTpGwks15DofCZWA.svg)](https://asciinema.org/a/eElkFG4szfTpGwks15DofCZWA)
 
-[![asciicast](https://asciinema.org/a/nua75qCJxlpVUIZbi3cgZmd3e.svg)](https://asciinema.org/a/nua75qCJxlpVUIZbi3cgZmd3e)
+[![asciicast](https://asciinema.org/a/BcSN0kvUZTdDCtanw4OulaRmn.svg)](https://asciinema.org/a/BcSN0kvUZTdDCtanw4OulaRmn)
 
-[![asciicast](https://asciinema.org/a/a35qGEdqvPTygaRDs81Bk8ruK.svg)](https://asciinema.org/a/a35qGEdqvPTygaRDs81Bk8ruK)
+[![asciicast](https://asciinema.org/a/KBIVX4hTvLSku7qs2cExci48y.svg)](https://asciinema.org/a/KBIVX4hTvLSku7qs2cExci48y)
 
-[![asciicast](https://asciinema.org/a/u8zKOvBSTELyLLTaKdmgJLTMo.svg)](https://asciinema.org/a/u8zKOvBSTELyLLTaKdmgJLTMo)
+[![asciicast](https://asciinema.org/a/eMDTN5HkXfBeR0FkiJmqRcWAF.svg)](https://asciinema.org/a/eMDTN5HkXfBeR0FkiJmqRcWAF)
+
+[![asciicast](https://asciinema.org/a/UOuSsrUcgvljxGe8It5FKksaP.svg)](https://asciinema.org/a/UOuSsrUcgvljxGe8It5FKksaP)
