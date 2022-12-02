@@ -6,6 +6,7 @@ use inquire::{
     CustomType, InquireError, MultiSelect, Select,
 };
 use mangadl_rs::{
+    args::{display_help, get_encoding, Encoding},
     chapter::Chapter,
     fetch,
     manga::Manga,
@@ -15,8 +16,15 @@ use tokio::time::sleep;
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
-    // Use theme only for linux builds. Comment out for windows builds.
-    inquire::set_global_render_config(get_render_config());
+    let args = std::env::args().collect::<Vec<_>>();
+    let encoding = get_encoding(&args);
+    if display_help(&args) {
+        return Ok(());
+    }
+
+    if encoding == Encoding::Unicode {
+        inquire::set_global_render_config(get_render_config());
+    }
 
     let future_manga = tokio::spawn(async move {
         loop {
@@ -173,8 +181,15 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         eprintln!("{}", "Please select a chapter".red().slow_blink());
     };
 
-    fetch::download_manga(ans, chapters, save_type, download_type, treads, true).await;
-    //fetch::download_manga(ans, chapters, save_type, download_type, treads, false).await; // For windows builds
+    fetch::download_manga(
+        ans,
+        chapters,
+        save_type,
+        download_type,
+        treads,
+        encoding == Encoding::Unicode,
+    )
+    .await;
 
     Ok(())
 }
