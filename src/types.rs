@@ -17,46 +17,40 @@ pub enum SaveType {
 
 impl Display for SaveType {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        // TODO Allign the text
         match self {
-            SaveType::Urls => write!(
-                f,
-                "{} {} {} {}",
-                "Text".blue(),
-                "Text file of URLS",
-                "(Fastest Save)".dark_green(),
-                "(Lowest RAM Usage)".green()
-            ),
+            SaveType::Urls => write!(f, "{} {}", "URLs             ".blue(), "Text file of URLS",),
             SaveType::PdfSplit => write!(
                 f,
-                "{} {} {} {}",
-                "PDF".blue(),
-                "Multiple pdfs split by chapters",
-                "(Slow Save)".dark_yellow(),
-                "(High RAM Usage)".red()
+                "{} {}\t{} {}",
+                "PDFs Split       ".blue(),
+                "Split by chapters",
+                "Slow Save        ".dark_yellow(),
+                "High RAM Usage   ".red()
             ),
             SaveType::PdfSingle => write!(
                 f,
-                "{} {} {} {}",
-                "PDF".blue(),
-                "Single pdf",
-                "(Slowest Save)".dark_red(),
-                "(High RAM Usage)".red()
+                "{} {}\t{} {}",
+                "PDF Single       ".blue(),
+                "Single pdf       ",
+                "Slowest Save     ".dark_red(),
+                "High RAM Usage   ".red()
             ),
             SaveType::ImagesChapter => write!(
                 f,
-                "{} {} {} {}",
-                "Images".blue(),
-                "Multiple folders split by chapters containing images",
-                "(Fast Save)".green(),
-                "(Low RAM Usage)".green()
+                "{} {}\t{} {}",
+                "Images Split     ".blue(),
+                "Chapter Folders  ",
+                "Fast Save        ".green(),
+                "Low RAM Usage    ".green()
             ),
             SaveType::Images => write!(
                 f,
-                "{} {} {} {}",
-                "Images".blue(),
-                "Folder containing images",
-                "(Fast Save)".green(),
-                "(Low RAM Usage)".green()
+                "{} {}\t{} {}",
+                "Images           ".blue(),
+                "Single Folder    ",
+                "Fast Save        ".green(),
+                "Low RAM Usage    ".green()
             ),
         }
     }
