@@ -1,3 +1,4 @@
+use std::fmt::Debug;
 use std::{
     error::Error,
     fmt::{Display, Formatter},
@@ -6,7 +7,7 @@ use std::{
 
 use crossterm::style::Stylize;
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Clone, PartialEq, Eq)]
 pub enum SaveType {
     Images,
     ImagesChapter,
@@ -15,9 +16,20 @@ pub enum SaveType {
     Urls,
 }
 
+impl Debug for SaveType {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        match self {
+            SaveType::Images => write!(f, "Images Single Folder"),
+            SaveType::ImagesChapter => write!(f, "Images by Chapter"),
+            SaveType::PdfSplit => write!(f, "Split PDFs"),
+            SaveType::PdfSingle => write!(f, "Single PDF"),
+            SaveType::Urls => write!(f, "URLs"),
+        }
+    }
+}
+
 impl Display for SaveType {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        // TODO Allign the text
         match self {
             SaveType::Urls => write!(f, "{} {}", "URLs             ".blue(), "Text file of URLS",),
             SaveType::PdfSplit => write!(

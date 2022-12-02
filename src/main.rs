@@ -49,6 +49,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
                 SaveType::Urls,
             ],
         )
+        .with_formatter(&|savetype| format! {"{:?}", savetype.value})
         .prompt()
         {
             Ok(k) => break k,
