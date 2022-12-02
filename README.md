@@ -1,6 +1,11 @@
 # mangadl-rs
 Simple manga downloader in rust
 
+![image](https://user-images.githubusercontent.com/91738719/205382033-98abec4e-a89e-452d-9580-da97b87ac979.png)
+
+![image](https://user-images.githubusercontent.com/91738719/205382203-4002eacf-449d-4fe7-b9f1-2df65cb5919e.png)
+
+
 # Installation
 
 ## Cargo
