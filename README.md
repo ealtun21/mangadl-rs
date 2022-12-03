@@ -1,5 +1,5 @@
 # mangadl-rs
-Simple manga downloader in rust
+Simple manga downloader in rust, from mangasee123.com
 
 ![image](https://user-images.githubusercontent.com/91738719/205382641-1e26d8c9-4e56-46a1-b68d-6afa10d18a45.png)
 
