@@ -307,7 +307,7 @@ pub fn save_to_pdf(images: BTreeMap<String, DynamicImage>, manga: &Manga, unicod
     let pdf = ImageToPdf::default()
         .add_images_par(images.into_par_iter().map(|(_, img)| img))
         .set_document_title(format!("{}.pdf", manga.i))
-        .create_with_progress_first_pdf(sty, m);
+        .create_with_progress(sty, m);
 
     println!("Saving to file...");
     pdf.save(&mut BufWriter::new(out_file)).unwrap();
@@ -349,7 +349,7 @@ pub fn save_to_pdf_split_chapters(
         let pdf = ImageToPdf::default()
             .add_images_par(images.into_par_iter())
             .set_document_title(format!("{}-{}.pdf", manga.i, chapter))
-            .create_pdf();
+            .create();
 
         pdf.save(&mut BufWriter::new(out_file)).unwrap();
         progress_bar.inc(1);
