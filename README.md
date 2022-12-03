@@ -28,3 +28,6 @@ cargo install --git https://github.com/ealtun21/mangadl-rs
 [![asciicast](https://asciinema.org/a/eMDTN5HkXfBeR0FkiJmqRcWAF.svg)](https://asciinema.org/a/eMDTN5HkXfBeR0FkiJmqRcWAF)
 
 [![asciicast](https://asciinema.org/a/UOuSsrUcgvljxGe8It5FKksaP.svg)](https://asciinema.org/a/UOuSsrUcgvljxGe8It5FKksaP)
+
+# Note
+Please note that I don’t encourage downloading copyrighted content. You must support your favorite artists by purchasing their work if you’re able to.
