@@ -1,6 +1,6 @@
 <h1 align="left">
   <br>
-  <a href="[https://github.com/CarlosEsco/Neko](https://github.com/ealtun21/mangadl-rs)"><img src="https://user-images.githubusercontent.com/91738719/212135048-92a88f58-95f1-4943-97df-02f5fa479374.png" alt="" width="200"></a>
+  <a href="[https://github.com/CarlosEsco/Neko](https://github.com/ealtun21/mangadl-rs)"><img src="https://user-images.githubusercontent.com/91738719/212135048-92a88f58-95f1-4943-97df-02f5fa479374.png" alt="" width="230"></a>
   <br>
   mangadl-rs
   <br>
