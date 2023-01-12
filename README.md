@@ -1,3 +1,5 @@
+![mangadl-rs-logo](https://user-images.githubusercontent.com/91738719/212135048-92a88f58-95f1-4943-97df-02f5fa479374.png)
+
 # mangadl-rs
 Simple manga downloader in rust, from mangasee123.com
 
