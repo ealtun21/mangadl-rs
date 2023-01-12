@@ -1,12 +1,11 @@
 <h1 align="center">
   <br>
-  <a href="[https://github.com/CarlosEsco/Neko](https://github.com/ealtun21/mangadl-rs)"><img src="https://user-images.githubusercontent.com/91738719/212135048-92a88f58-95f1-4943-97df-02f5fa479374.png" alt="mngadl-rs" width="200"></a>
+  <a href="[https://github.com/CarlosEsco/Neko](https://github.com/ealtun21/mangadl-rs)"><img src="https://user-images.githubusercontent.com/91738719/212135048-92a88f58-95f1-4943-97df-02f5fa479374.png" alt="" width="200"></a>
   <br>
-  Neko
+  mangadl-rs
   <br>
 </h1>
 
-# mangadl-rs
 Simple manga downloader in rust, from mangasee123.com
 
 ![image](https://user-images.githubusercontent.com/91738719/205382641-1e26d8c9-4e56-46a1-b68d-6afa10d18a45.png)
