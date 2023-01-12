@@ -1,4 +1,10 @@
-![mangadl-rs-logo](https://user-images.githubusercontent.com/91738719/212135048-92a88f58-95f1-4943-97df-02f5fa479374.png)
+<h1 align="center">
+  <br>
+  <a href="[https://github.com/CarlosEsco/Neko](https://github.com/ealtun21/mangadl-rs)"><img src="https://user-images.githubusercontent.com/91738719/212135048-92a88f58-95f1-4943-97df-02f5fa479374.png" alt="mngadl-rs" width="200"></a>
+  <br>
+  Neko
+  <br>
+</h1>
 
 # mangadl-rs
 Simple manga downloader in rust, from mangasee123.com
