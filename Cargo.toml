@@ -6,22 +6,24 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-image = "0.24.3"
-reqwest = { version = "0.11.11", features = ["json"] }
-tokio = { version = "1.20.1", features = ["full"] }
-regex = "1.6.0"
-serde = { version = "1.0.144", features = ["derive"] }
-serde_json = "1.0.85"
-scraper = "0.13.0"
-relative-path = "1.7.2"
-inquire = "0.5.2"
-manic = "0.8.1"
-indicatif = { version = "0.17.0", features = ["tokio"] }
-crossterm = "0.25.0"
-printpdf = { version = "0.5.3", features = ["embedded_images"] }
-rayon = "1.5.3"
-image_to_pdf = { git = "https://github.com/ealtun21/image-to-pdf", version = "0.7.0", features = ["progress"] }
-brotlic = "0.8.0"
+image = "^0.24.3"
+reqwest = { version = "^0.11.11", features = ["json"] }
+tokio = { version = "^1.20.1", features = ["full"] }
+regex = "^1.6.0"
+serde = { version = "^1.0.144", features = ["derive"] }
+serde_json = "^1.0.85"
+scraper = "^0.16.0"
+relative-path = "^1.7.2"
+inquire = "^0.6.2"
+manic = "^0.8.1"
+indicatif = { version = "^0.17.0", features = ["tokio"] }
+crossterm = "^0.26.1"
+printpdf = { version = "^0.5.3", features = ["embedded_images"] }
+rayon = "^1.5.3"
+image_to_pdf = { git = "https://github.com/ealtun21/image-to-pdf", version = "^0.7.0", features = [
+    "progress",
+] }
+brotlic = "^0.8.0"
 
 
 [profile.release]
