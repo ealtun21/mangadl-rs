@@ -12,13 +12,13 @@ tokio = { version = "^1.20.1", features = ["full"] }
 regex = "^1.6.0"
 serde = { version = "^1.0.144", features = ["derive"] }
 serde_json = "^1.0.85"
-scraper = "^0.16.0"
+scraper = "^0.17.1"
 relative-path = "^1.7.2"
 inquire = "^0.6.2"
 manic = "^0.8.1"
 indicatif = { version = "^0.17.0", features = ["tokio"] }
-crossterm = "^0.26.1"
-printpdf = { version = "^0.5.3", features = ["embedded_images"] }
+crossterm = "^0.27.0"
+printpdf = { version = "^0.6.0", features = ["embedded_images"] }
 rayon = "^1.5.3"
 image_to_pdf = { git = "https://github.com/ealtun21/image-to-pdf", version = "^0.7.0", features = [
     "progress",
